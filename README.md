@@ -1,2 +1,3 @@
 # CLOUD-COMPUTING
-Repo for Cloud Computing Class (ICE 191)
+## Ximena González
+Repo for assignments/projects Cloud Computing Class
