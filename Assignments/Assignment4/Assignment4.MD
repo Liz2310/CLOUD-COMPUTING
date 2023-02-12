@@ -14,7 +14,7 @@ The most common form ot API Throttling is Rate-Limit Throttling. For example, a 
 
 Now imagine where this happens on a site with a large number of users, the site is bound to show degradation in performance since it's receiving tons of request in short periods of time, this when Rate-Limit Throttling comes into play.
 
-How it is implemented:
+**How it is implemented:**
 - There are many algorithms for this, but the steps can be resumed to the following:
 
 	1.  Client calls an API that interfaces with a web application.
@@ -23,19 +23,19 @@ How it is implemented:
 	4. If the request exceeds the limit, the API returns an error response to the user.
 	5. The user will have to wait for a pre-agreed time period, or pay to make any more API calls.
 
-Algorithms:
-- Leaky Bucket
+**Popular algorithms:** 
+- **Leaky Bucket**
 	- Uses a first-in, first-out (FIFO) queue (with a specific size) to hold the incoming requests.
 	- If the queue still has space, it accepts requests by putting them at the end.
 	- If the queue doesn't have space, it discards the request.
 
-- Fixed Window
+- **Fixed Window**
 	- Allows N number of API calls from a user in a fixed time window.
 	- At the start of the window, a counter is started at 0.
 	- With every incoming request from a user, the counter is incremented.
 	- If the counter reaches the limit (N) before the time window is over, new requests are declined.
 
-- Sliding Window
+- **Sliding Window**
 	- Uses a time window like in Fixed Window.
 	- The window time is broken down into smaller buckets.
 	- Each bucket stores the request count corresponding to the bucket time range,  which constantly keeps moving across time.
@@ -45,21 +45,22 @@ Algorithms:
 			- Maxing out the “5 requests/min” limit for the `_:01:_` to `_:02:_` one-minute interval
 		- All other requests for that interval would be dropped, till the start of a new window: `_:03:_`.
 
-![image](https://github.com/Liz2310/CLOUD-COMPUTING/blob/main/Assignments/Assignment4/images/sv.jpeg)
+<p align="center">
+  <img src="https://github.com/Liz2310/CLOUD-COMPUTING/blob/main/Assignments/Assignment4/images/sv.jpeg">
+</p>
 
-Benefits:
+**Other Types of Throttling:**
+- ***IP-Level Throttling***: You can make your API accessible only to a certain list of whitelisted IP addresses. 
+	- You can also limit the number of requests sent by a certain client IP.
+- ***Scope Limit Throttling***: Based on the classification of a user, you can restrict access to specific parts of the API - certain methods, functions, or procedures. 		
+	-  Implementing scope limits can help you leverage the same API across different departments in the organization.
+-   ***Concurrent Connections Limit***: Sometimes an application can't respond to more than a certain number of requests. In such cases, it's necessary limit the number of requests from a client (this ensures that other users don't face a DoS error). 
+-   ***Resource-Level Throttling***: If a certain query returns a large result, the request can be throttled so that the SQL engine limits the number of rows returned.
+
+**Benefits:**
 - Users with better/faster connections might get a better experience than others. API throttling is a way ensure fair use of their APIs.
 - Helps to fight back denial of service (DoS) attack, where malicious user(s) sends enormous volumes of requests to bring down a website or a mobile application.
 - Helps to keep costs under control if an API consumes a large amount of resources or is linked to another ‘paid’ API.
-
-Other Types of Throttling:
-- IP-Level Throttling: You can make your API accessible only to a certain list of whitelisted IP addresses. 
-	- You can also limit the number of requests sent by a certain client IP.
-- Scope Limit Throttling: Based on the classification of a user, you can restrict access to specific parts of the API - certain methods, functions, or procedures. 		
-	-  Implementing scope limits can help you leverage the same API across different departments in the organization.
--   Concurrent Connections Limit: Sometimes your application cannot respond to more than a certain number of connections. In such cases, you need to limit the number of connections from a user/account to make sure that other users don't face a DoS (Denial of Service) error. 
-	- This kind of throttling also helps secure your application against malicious cyberattacks.
--   Resource-Level Throttling (also referred to as Hard Throttling): If a certain query returns a large result set, you can throttle the request so that your SQL engine limits the number of rows returned by using conditions attributes like TOP, SKIP, SQL_ATTR_MAX_ROWS, etc.
 
 ## 2. Describe the concept of pagination in APIs. 15 points.
 
