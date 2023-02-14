@@ -125,9 +125,68 @@ There are many pagination methods:
 	- Depending on how many filter conditions there are, the *WHERE* clause could become complex.
 
 ## 3. Describe the concept of callback function. 15 points.
+A callback function is a function that is passed as an argument to another function, to be “called back” at a later time.
 
+A callback function always has a specific action which is bound to a specific circumstance. Therefore, a callback function is only called once a clearly defined operation has been performed.
 
-The file explorer is accessible using the button in left corner of the navigation bar. You can create a new file by clicking the **New file** button in the file explorer. You can also create folders by clicking the **New folder** button.
+The invocation may be immediate as in a synchronous callback or it might happen at later time, as in an asynchronous callback. 
+
+- They are useful for asynchronous behavior where we want an activity to take place whenever a previous event completes (i.e. actions that are initiated now, but they finish later). 
+
+A use case is when data is requested from other sources, such as an external API, it's not always know when the data will be served back. In these instances it's needed to wait for the response, but we it's not ideal to have the entire application grinding to a halt while the data is being fetched, this when callbacks become useful.
+
+Example:
+
+```javascript
+function serverRequest(query, callback){
+  setTimeout(function(){
+    var response = query + "full!";
+    callback(response);
+  },5000);
+}
+
+function getResults(results){
+  console.log("Response from the server: " + results);
+}
+
+serverRequest("The glass is half ", getResults);
+
+// Result in console after 5 second delay:
+// Response from the server: The glass is half full!
+```
+
+- The *serverRequest* takes a callback function as an argument.
+	- It uses *setTimeout* to simulate an asynchronous operation.
+		- It takes two arguments: a callback function and a delay time in milliseconds.
+- After 5 seconds elapse the response is modified and then the callback function *getResults* gets executed.
+
+In asynchronous programming (basically, allowing other operations to continue before one operation has completed - i.e. waiting for data in the database), callbacks are essential because we want to tell a function what to do once it’s done with a task.
+
+``` js
+function doSomethingAfterClick() {
+  numberOfClicks++; // Count the number of mouse clicks, just for the sake of example.
+}
+
+const button = document.getElementById('action-button');
+
+button.addEventListener("click", doSomethingAfterClick); // here is the callback situation
+
+```
+
+<p align="center">
+  <img src="https://github.com/Liz2310/CLOUD-COMPUTING/blob/main/Assignments/Assignment4/images/ac.png">
+</p>
+
+In this image the concept of asynchronous becomes clearer:
+- The parent doesn't need to wait for the callback function to return.
+- An example of this is JavaScript:
+	- You pass a function that will be invoked, but other events will continue to be processed until the callback is invoked (such as click of buttons). The order of the events doesn't matter, so the code is set to be listening for these events and execute callbacks untile said event happens.
+
+In an API context this concept applies as follows:
+- Asynchronous calls do not block (or wait) for the API call to return from the server. Execution continues on in the program, and when the call returns from the server, a "callback" function is executed.
+- Asynchronous APIs can process multiple requests at the same time. The APIs allow time-consuming requests to be processed in the background while more minor requests are serviced right away.
+- In JavaScript, if you add an `async` keyword to a script, JavaScript processes it in the background without stopping the execution of the following scripts. These APIs work in a similar fashion.
+- These APIs are implemented using different protocols like WebHooks, Websockets, GraphQL Subscriptions, and Server-Sent Events. Like the OpenAPI specification, AsyncAPI provides a specification for Asynchronous APIs that allows developers, architects, and product managers to define asynchronous API interfaces.
 
 ## 4. Describe the concept of cold start in AWS Lambda. 
 
