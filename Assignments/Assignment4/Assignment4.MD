@@ -64,7 +64,65 @@ Now imagine where this happens on a site with a large number of users, the site 
 
 ## 2. Describe the concept of pagination in APIs. 15 points.
 
-The file explorer is accessible using the button in left corner of the navigation bar. You can create a new file by clicking the **New file** button in the file explorer. You can also create folders by clicking the **New folder** button.
+Examples of pagination: clicking through an archive of pictures, going through the results of a google search or turning the page of a book.
+
+When using a GET API request to request information from a server, there could be thousands of entries in the returned JSON file. If the API result outputs thousands of entries at once, this is a drain of resources and a waste of time. It's better search through a server/database a little bit at a time. This when paging helps to query databases efficiently (helps to limit the number of results to help keep network traffic in check), and have API responses be more efficient.
+
+There are many pagination methods:
+- **Offset Pagination**
+	- This methods allows clients to supply two additional parameters in their query: an _offset_, and a _limit_.
+		- An offset is the number of records you wish to skip before selecting records.
+		- A limit is the maximum number of entries to return.
+	-	Example:
+		-	If the request is to get the first page of the newest posts from a database, the API call might look like this:
+			-	In this case the first page, containing the first 20 items, will be shown. (this will search 20 items at a time, and skip 0 of them).
+
+				```GET /items?limit=20&offset=0```
+
+			-	Now, if the second page is to be looked at, the next API call would look something like this:
+
+
+				```GET /items?limit=20&offset=20```
+
+				To fetch the next page of entries the API needs to be called with an *offset* parameter that equals the sum of the previous *offset* value and *limit* returned in the previous result, `new_offset = previous_offset + previous_limit`
+
+	-	This method becomes slower as the number of records increases because the API still has to read up to the offset number of rows to know where it should start selecting data.
+	-	Results can be faulty or missing because, if the API calls are made on databases that change frequently, the window of results will often be inaccurate across different pages in that you will either miss results entirely or see duplicates because results have now been added to the previous page.
+
+- **Keyset Pagination**
+	- Also known as the "seek method".
+	- Instead of using the *offset* clause to skip rows to determine where the returned dataset should start, a *where* clause is used.
+	- Example:
+		- Considering a database with 1 000 000 rows, with an int _Id_ primary key column on which the data is sorted.
+		To retrieve the first page:
+		`GET /items?limit=50&after_id=0`
+			```sql
+			SELECT TOP 50 Id 
+			FROM DataBaseExample
+			WHERE Id > 0
+			ORDER BY Id ASC
+			```
+			To retrieve the 10th page:
+			`GET /items?limit=50&after_id=500`
+			```sql
+			SELECT TOP 50 Id 
+			FROM DataBaseExample
+			WHERE Id > 500
+			ORDER BY Id ASC
+			```
+
+-	Using the *WHERE* clause and the index, the API does not need to go through _X_ number rows to find the correct starting point.
+-	It features consistent ordering, even when new items are added to the database.
+-	This can be done provided that the key used in the *WHERE* clause to implement the pagination is indexed and unique. 
+	-	Both criteria are met by the concept of a primary key.
+- Specific filtering can get complicated. Consider if the data is going to be sorted by a _CreatedDate_ column, and if two records have the same _CreatedDate_, then they should be sorted by _Id_.
+	```sql
+	SELECT TOP 50 DateCreated, Id 
+	FROM OffSetDemo
+	WHERE ((DateCreated > '2022/06/12') OR (DateCreated = '2022/06/12' AND Id > 500))
+	ORDER BY DateCreated, Id ASC
+	```
+	- Depending on how many filter conditions there are, the *WHERE* clause could become complex.
 
 ## 3. Describe the concept of callback function. 15 points.
 
