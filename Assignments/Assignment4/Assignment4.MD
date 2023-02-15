@@ -229,7 +229,48 @@ What is cold start in AWS Lambda?
 
 ## 5. Describe each HTTP methods. 15 points.
 
-The file explorer is accessible using the button in left corner of the navigation bar. You can create a new file by clicking the **New file** button in the file explorer. You can also create folders by clicking the **New folder** button.
+What is HTTP?
+- Stands for **H**yper **T**ext **T**ransfer **P**rotocol.
+- It's an application-layer protocol for exchanging files on the World Wide Web, such as HTML.
+	- HTTP follows a typical client-server model, with web browsers being HTTP clients that send file requests to Web servers.
+
+- Communication between client computers and web servers is done by sending **HTTP Requests** and receiving **HTTP Responses**
+
+HTTP Methods:
+- GET: used only to retrieve resource representation/information (read-only).
+	- It's idempotent: making multiple identical requests must produce the same result every time until another method (POST or PUT) has changed the state of the resource on the server.
+
+- HEAD: is similar to the GET method, but without the response body (transfers the status line and header section only).
+	- It returns the headers that would be returned if the request was made with the GET method.
+	- Example: a GET request could produce a large download, a HEAD request could read its *Content-Length* header to check the filesize without actually downloading the file.
+	- It's also idempotent
+
+- POST: creates a new resource on the server, causing a change in state or side effects on the server's side.
+	- The request body carries the data to be created in the server.
+	- It's not idempotent: it's not expected to get the same result every time a POST request is sent. For example making two identical POST requests will result in two different resources containing the same information (except resource ids).
+
+- PUT: updates an existing resource by sending the updated data in the request body to the server.
+	- The update is done by replacing the resource's content completely.
+	- It's idempotent: making the same request once or several times successively has the same effect (that is no _side_ effect).
+
+- DELETE: deletes all current representations of the target resource given by a URI.
+	- It's idempotent: regardless of the number of calls, it returns the same result.
+
+- CONNECT: used for making end-to-end connections between a client and a server (it creates a tunnel to the server identified by a given URI).
+	- A use case example would be to safely transfer a large file between the client and the server.
+
+- OPTIONS: to get information about the allowed HTTP methods for a given URL or an entire server (denoted by *). 
+	- It's idempotent.
+
+- TRACE: it creates a loop-back test with the same request body that the client sent to the server before.
+	- The server echoes back the TRACE request it received, this way the user can see if during the transaction, the request was modified by proxies (it allows one to take a look at the path to the targeted resource/server; steps taken to deliver an HTTP request to the resource).
+	- It's idempotent.
+	- Potentially dangerous because it could reveal credentials used anywhere along the path to the targeted resource.
+
+- PATCH: it applies partial modifications to a resource.
+	- The PATCH method is the correct choice for partially updating an existing resource, and PUT should only be used if a resource is being replaced in its entirety.
+		- PATCH is a set of instructions (which come in standard formats such as JSON or XML) on how to modify a resource, PUT is a complete representation of a resource.
+	- Not necessarily idempotent, but it can be.
 
 ## 6. Describe how you can automate a deployment of a static website to S3. 15 points
 
