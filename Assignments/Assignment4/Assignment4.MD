@@ -190,7 +190,42 @@ In an API context this concept applies as follows:
 
 ## 4. Describe the concept of cold start in AWS Lambda. 
 
-The file explorer is accessible using the button in left corner of the navigation bar. You can create a new file by clicking the **New file** button in the file explorer. You can also create folders by clicking the **New folder** button.
+What is Serverless?
+- Refers to serverless applications. 
+- Serverless applications are ones that don’t need any server provision and do not require to manage servers.
+
+What is AWS Lambda?
+- Serverless computing platform provided by AWS.
+- Therefore, there's no need to worry about which AWS resources to launch, or how they will be managed.
+	- Instead, you put the code on Lambda, and it runs.
+
+How AWS Lambda works:
+- The code is executed based on the response to events in AWS services such as add/delete files in S3 bucket, HTTP request from Amazon API gateway, etc.
+- It can only be used to execute background tasks.
+
+<p align="center">
+  <img src="https://github.com/Liz2310/CLOUD-COMPUTING/blob/main/Assignments/Assignment4/images/lambda.jpeg">
+</p>
+
+- **Step 1:** First upload your AWS Lambda code in any language supported by AWS Lambda. 
+
+- **Step 2:** Some AWS services which allow you to trigger AWS Lambda.
+
+- **Step 3:** AWS Lambda upload code and the event details on which it should be triggered.
+
+- **Step 4:** Executes AWS Lambda Code when it is triggered by AWS services.
+
+- **Step 5:** AWS charges only when the AWS lambda code executes, and not otherwise.
+
+What is cold start in AWS Lambda?
+- Lambda uses its own containers to execute code, these containers have predefined runtime environments.
+
+- When a function is called for the very first time, Lambda will pick up an empty container with the appropriate runtime and wrap the function, already pulled from S3.
+	- The first time a function is called, it takes a bit more time to execute and respond because of this setup. 
+	- Any subsequent iteration with the same function will be quite faster than the first one.
+- So the very first iteration with a function is called a **cold start**. 
+	- When a new instance handles its first request, the response time increases 
+
 
 ## 5. Describe each HTTP methods. 15 points.
 
