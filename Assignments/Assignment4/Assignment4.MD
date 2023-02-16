@@ -274,6 +274,58 @@ HTTP Methods:
 
 ## 6. Describe how you can automate a deployment of a static website to S3. 15 points
 
-The file explorer is accessible using the button in left corner of the navigation bar. You can create a new file by clicking the **New file** button in the file explorer. You can also create folders by clicking the **New folder** button.
+Automating a website in an Amazon S3 bucket can de defined as a CI/CD pipeline (continuous integration and continuous delivery). 
+
+According to AWS documentation, this can be done using GitHub as a source provider.
+
+> The pipeline starts when new items are committed, and the changes are then reflected in the S3 bucket.
+
+The pipeline is created via he **AWS Codepipeline** service.
+- It's CD service used to automate the building, testing and deploying of software into production environment.
+- In this case, changes made to the GitHub repository of the static website to AWS S3 will be automatically deployed.
+- To create a pipeline, the cli command looks like this:
+	 `aws codepipeline create-pipeline --pipeline`
+	 
+	The --pipeline flag points to a JSON file the attributes and values that indicate the actions and stages that the pipeline is going to perform.
+	-	What's important to note in this JSON is the stages section, specifically the Source subsection.
+		-	This is where the GitHub ()integration with AWS Codepipeline goes.
+		-	This integration is created with the following command and format:
+    `aws codestar-connections create-connection --provider-type GitHub --connection-name MyConnection`
+    This returns the connection's ARN information, which is used in the pipeline's JSON:
+    ```json
+    {
+    "Name": "Source",
+    "Actions": [
+        {
+            "InputArtifacts": [],
+            "ActionTypeId": {
+                "Version": "1",
+                "Owner": "AWS",
+                "Category": "Source",
+                "Provider": "CodeStarSourceConnection"
+            },
+            "OutputArtifacts": [
+                {
+                    "Name": "SourceArtifact"
+                }
+            ],
+            "RunOrder": 1,
+            "Configuration": {
+                "ConnectionArn": "arn:aws:codestar-connections:region:account-id:connection/connection-id",
+                "FullRepositoryId": "some-user/my-repo",
+                "BranchName": "main",
+                "OutputArtifactFormat": "CODE_ZIP"
+            },
+            "Name": "ApplicationSource"
+        }
+    ]
+    },
+   ```
+
+	NOTE:  The GitHub repository should have the static website files.
+- Once having the pipeline created., any changes made on the GitHub repository should be visible in the live URL.  
+
+Observations:
+- Made for read-only content (it's not safe for transaction with sensitive data; Amazon S3 uses HTTP protocol).
 
 ## 7. Read the Real-world [Engineering Challenges #8: Breaking up a Monolith](https://newsletter.pragmaticengineer.com/p/real-world-eng-8) article and write a summary and opinions about it. 10 points.
