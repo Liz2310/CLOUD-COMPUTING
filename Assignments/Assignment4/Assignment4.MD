@@ -329,3 +329,46 @@ Observations:
 - Made for read-only content (it's not safe for transaction with sensitive data; Amazon S3 uses HTTP protocol).
 
 ## 7. Read the Real-world [Engineering Challenges #8: Breaking up a Monolith](https://newsletter.pragmaticengineer.com/p/real-world-eng-8) article and write a summary and opinions about it. 10 points.
+
+**Summary:**
+- In 2019, Khan Academy took on the challenge of moving one million lines of Python code and splitting them across more than 40 services, but now in a different language: Go. This migration took 3.5 years and involved around 100 software engineers.
+- The migration was triggered because of Python's 2 end.
+- The team, after due diligence, decided to migrate to Go (quick compile times, good support on Google App Engine, saves memory, amongst other benefits).
+- Goals of the project:
+	-  Migrate 100% of Python 2 code to Go.
+	- Have only GraphQL endpoints.
+	- Use GraphQL federation.
+	- Agree on architectural strategies (from monolith to services-oriented architecture).
+		- Testing/deployments for a single services is way quicker.
+		- Limited impact in case something goes wrong in a service.
+		- Personalized configurations for each service.
+- Two phases:
+	- *Phase 1 Minimum Viable Experience:* Define what the key features were from a user experience perspective (content publishing, content delivery, progress tracking, user management, etc.), in order to prioritize their migration.
+	- *Phase 2: endgame:* Rewriting everything else that wasn't part of the MVE, internal tools and adding extra features to services. 
+
+- Gradual migration with gradual testing was the approach: Testing is key part of the migration. 
+	- Simulating traffic in the new services.
+	- Side by side testing of GraphQL queries on both services but only returning a response from the stable (Python) service.
+	- Canary testing for modifying the server on the new Go service.
+	- Finally using completely the Go service, but having the Python service in case it's needed.
+	- Remove Python service completely.
+
+- The services followed the rule that only one service could write a given piece of data. 
+- The project followed a fixed deadline, no room for flexibility on deliverables.
+	- The team applied “borderless engineering”, which consists of individuals floating from team to team for short periods of time, to help out on work when it’s necessary.
+	- This was done in order to meet set deadlines, putting the project at risk was not an option.
+
+- Both the MVE and the migration were done and deployed on the preestablished dates.
+
+**Opinions:**
+- Most of the improvements or changes are forced on a project rather than "self impulsed" (in this case the end of Python 2 forced the team to change).
+- Having and MVE rather than an MVP (MV Product) helps to really put developers in the shoes of users and prioritize what their needs are, therefore making it clear what the most important and urgent services are.
+- The incremental/gradual testing and migration strategy makes it effective for situations where a rollback is needed. This enables quick changes, and at the same time enables quick solutions.
+- Also I haven't come in contact with side-by-side testing, but its use is very clear in this case because of the fact that two services were being compared. Feels like an immediate way of knowing when something's working the way it's supposed to.
+- I like this very modular approach of one service owns a piece of data, it leaves no room for ambiguity or confusion about what the service handles. Preps the service so any fresh pair of eyes know what they're dealing with.
+- Sometimes flexibility is a big impediment to meeting deadlines. Taking hard measures can do great things in the process of accomplish a goal.
+- Borderless engineering is an interesting concept, similar to the Spotify model where members from squads can rotate if necessary.
+	- From personal experience, with the right set of people, this can create an amazing cross functional team and knowledge transfers become way easier.
+
+- Changing languages sometimes relies more on how quickly the engineers can adapt to it rather than the costs it saves (contrary to this case where costs were prioritized).
+- I agree that motivation in workspaces were active learning is embraced. Trying to figure out and learning the in and outs of a new technology. The feeling of reward this brings (most of the time) is immeasurable.
