@@ -57,10 +57,20 @@ Now imagine where this happens on a site with a large number of users, the site 
 -   ***Concurrent Connections Limit***: Sometimes an application can't respond to more than a certain number of requests. In such cases, it's necessary limit the number of requests from a client (this ensures that other users don't face a DoS error). 
 -   ***Resource-Level Throttling***: If a certain query returns a large result, the request can be throttled so that the SQL engine limits the number of rows returned.
 
-**Benefits:**
+**Pros:**
 - Users with better/faster connections might get a better experience than others. API throttling is a way ensure fair use of their APIs.
+- Setting a throttle ensures that the target does not become operationally overwhelmed.
+	- An overloaded server can quickly lead to cascading failures (domino effect) elsewhere in the system.
+		- It can start displaying error codes, delaying service requests, denying tcp connections, delivering incomplete content.
+	- If an application has millions of users, a system might get a huge number of API requests per second.
+	- Responding to all those API requests will slow down the system and affect its performance, or make it fail (such as in a denial of service attack). 
 - Helps to fight back denial of service (DoS) attack, where malicious user(s) sends enormous volumes of requests to bring down a website or a mobile application.
+	- A throttle will detect the increase in traffic caused by the attack and react. That reaction might be to block traffic coming in from the malevolent IP address or to slow down the rate of traffic in general.
 - Helps to keep costs under control if an API consumes a large amount of resources or is linked to another ‘paid’ API.
+
+**Cons:**
+- Performance can degrade when targets are slowed down due to the threshold imposed by the established throttle.
+
 
 ## 2. Describe the concept of pagination in APIs. 15 points.
 
@@ -124,6 +134,16 @@ There are many pagination methods:
 	```
 	- Depending on how many filter conditions there are, the *WHERE* clause could become complex.
 
+Benefits:
+- Some APIs can return millions of search results, if not more. This can slow the response time of an API call down to a crawl, automatically implies adding order to the query result.
+	- Or even worse: Having the system respond very slowly or not at all (as mentioned in the last question: server overload). 
+	- Pagination is done in order to not saturate the system with long processes/requests of single read instance and to prevent the exhaustion of its resources.
+- If clients need less data, it ensures that the client isn't fetching more than needed.
+	- Plus: returning less data is faster and cheaper.
+- Helps keep services efficient and protected:
+	- If a smaller request/response fails, it's quicker to retry that request instead of retrying the really big response.
+	- Some clients and servers don't work well with streaming data, so getting a ton of items means they all have to fit in memory. Splitting up responses takes some workload off the services, and it might also result in quicker rendering for a user.
+	
 ## 3. Describe the concept of callback function. 15 points.
 A callback function is a function that is passed as an argument to another function, to be “called back” at a later time.
 
@@ -188,6 +208,37 @@ In an API context this concept applies as follows:
 - In JavaScript, if you add an `async` keyword to a script, JavaScript processes it in the background without stopping the execution of the following scripts. These APIs work in a similar fashion.
 - These APIs are implemented using different protocols like WebHooks, Websockets, GraphQL Subscriptions, and Server-Sent Events. Like the OpenAPI specification, AsyncAPI provides a specification for Asynchronous APIs that allows developers, architects, and product managers to define asynchronous API interfaces.
 
+Languages that support callback functions fall under the term: *Functional languages*
+- Generally, they support first-class functions.
+	- A language has this kind of functions if it handles functions as first-class citizens (functions are treated the same as other entities, for example as variables; ).
+	- i.e. This means the language supports:
+		- Passing functions as arguments to other functions (callback).
+		- Returning them as the values from other functions.
+		- Assigning them to variables or storing them in data structures.
+
+Examples of languages that support call back functions (directly or through their own implementation):
+- C
+- C++
+- Pascal
+- Modula2
+- JavaScript
+- Lua
+- Python
+- Perl
+- PHP
+- C#
+- Visual Basic
+- Erlang
+- Go
+- Java
+
+Examples of languages that DON'T support call back functions:
+- D
+- Fortran
+- COBOL
+- Algol
+- Basic
+
 ## 4. Describe the concept of cold start in AWS Lambda. 
 
 What is Serverless?
@@ -226,7 +277,65 @@ What is cold start in AWS Lambda?
 - So the very first iteration with a function is called a **cold start**. 
 	- When a new instance handles its first request, the response time increases 
 
+- NOTE: 
+	- After that request is processed, the container stays alive for only a certain amount of time to be reused for subsequent requests. This time lapse can pass before a new request, therefore causing the container to "drop" and cause (again) a cold start in Lambda.
+	- Also, each container has a limit of simultaneous requests, if this limit is passed (concurrent executions, by default the limit is 1000 by function, not by container), AWS starts another container, and starts the same setup process described earlier.
+	- Last two points are to make it clear that cold start doesn't happens just the first time a function is called.
 
+How to avoid cold starts (one way of many...):
+- Keep Lambdas Hot by creating a scheduled event Lambda (the warmer) that invokes all the Lambdas selected in a specified time interval, forcing the containers to stay alive.
+	- One interesting [plugin](https://github.com/juanjoDiaz/serverless-plugin-warmup)
+
+- Or with CloudWatch Events:
+	- Set up a rule on AWS CloudWatch Events to run an AWS Lambda function on a schedule.
+	- Example:
+	
+	Command:
+	```
+	aws events put-rule \
+	--name my-scheduled-rule \
+	--schedule-expression 'rate(5 minutes)'
+	```
+
+	Output (an event, it's ARN is used as input for the lambda function)
+
+	```
+	{
+    "version": "0",
+    "id": "53dc4d37-cffa-4f76-80c9-8b7d4a4d2eaa",
+    "detail-type": "Scheduled Event",
+    "source": "aws.events",
+    "account": "123456789012",
+    "time": "2015-10-08T16:53:06Z",
+    "region": "us-east-1",
+    "resources": [
+        "arn:aws:events:us-east-1:123456789012:rule/my-scheduled-rule"
+    ],
+    "detail": {}
+	}
+	```
+	Add permission to (and create)  Lambda function so it can trust CloudWatch Events and therefore the rule:
+	```
+	aws lambda add-permission \
+	--function-name LogScheduledEvent \
+	--statement-id my-scheduled-event \
+	--action 'lambda:InvokeFunction' \
+	--principal events.amazonaws.com \
+	--source-arn arn:aws:events:us-east-1:123456789012:rule/my-scheduled-rule
+	```
+	Finally, add the created Lambda function to the rule (takes like 5 minutes to see if it was invoked or not):
+	
+	```
+	aws events put-targets --rule my-scheduled-rule --targets file://targets.json
+	```
+	``` json
+	[
+	  {
+	    "Id": "1", 
+	    "Arn": "arn:aws:lambda:us-east-1:123456789012:function:LogScheduledEvent" 
+	   }
+   ]
+	```
 ## 5. Describe each HTTP methods. 15 points.
 
 What is HTTP?
